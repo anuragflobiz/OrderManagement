@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  item: one
+  order: one
+  quantity: 1
+  item_price: 9.99
+  item_name: MyString
+  deleted_at: 2026-02-24 16:12:53
+
+two:
+  item: two
+  order: two
+  quantity: 1
+  item_price: 9.99
+  item_name: MyString
+  deleted_at: 2026-02-24 16:12:53
