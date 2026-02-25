@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  include SoftDeletable
   has_secure_password
 
   has_many :orders, dependent: :destroy
@@ -9,5 +10,13 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :password, presence: true
 
-  scope :active, -> { where(:deleted_at => nil)}
+  enum role: { retailer: 0, customer: 1 }
+
+  def retailer?
+    role == 'retailer'
+  end
+  
+  def customer?
+    role == 'customer'
+  end
 end

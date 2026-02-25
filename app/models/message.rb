@@ -1,4 +1,6 @@
 class Message < ApplicationRecord
+
+  include SoftDeletable
   belongs_to :user
   belongs_to :message_template
   

@@ -1,4 +1,5 @@
 class Item < ApplicationRecord
+  include SoftDeletable
   belongs_to :user
   has_many :item_orders, dependent: :destroy
   has_many :orders, through: :item_orders
@@ -7,4 +8,8 @@ class Item < ApplicationRecord
   scope :active, -> { where(deleted_at: nil) }
   scope :low_stock, -> { active.where('quantity < ?', 10) }
   scope :out_of_stock, -> { active.where(quantity: 0) }
+
+  def available?
+    quantity > 0 && !deleted?
+  end
 end

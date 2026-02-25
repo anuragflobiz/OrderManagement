@@ -1,4 +1,5 @@
 class Order < ApplicationRecord
+  include SoftDeletable
   belongs_to :user
 
   has_many :item_orders, dependent: :destroy
@@ -8,4 +9,6 @@ class Order < ApplicationRecord
   validates :amount, presence: true
 
   scope :active, -> { where(deleted_at: nil) }
+
+  enum status: { pending: 0, confirmed: 1, cancelled: 2 }
 end
