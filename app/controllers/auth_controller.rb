@@ -7,7 +7,7 @@ class AuthController < ApplicationController
 
     return render_error('Email required') if email.blank?
     otp= OtpService.generate(email,purpose)
-    OtpMailer.send_otp(email, otp, purpose).deliver_now
+    OtpMailer.send_otp(email, otp, purpose).deliver_later
     render_success(nil, "OTP sent to #{email}")
   end
 
@@ -49,7 +49,7 @@ class AuthController < ApplicationController
     return render_error('Email not found') unless user
     
     otp = OtpService.generate(email, 'reset')
-    OtpMailer.send_otp(email, otp, 'reset password').deliver_now
+    OtpMailer.send_otp(email, otp, 'reset password').deliver_later
     
     render_success(nil, "Reset OTP sent")
   end
