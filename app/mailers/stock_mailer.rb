@@ -5,7 +5,8 @@ class StockMailer < ApplicationMailer
 
     mail(
       to: @retailer.email,
-      subject: "Daily Stock Report"
+      subject: "Daily Stock Report",
+      body:body
     )
   end
 end
