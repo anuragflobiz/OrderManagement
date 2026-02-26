@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_02_24_115933) do
+ActiveRecord::Schema.define(version: 2026_02_26_112909) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 2026_02_24_115933) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["item_id"], name: "index_item_orders_on_item_id"
+    t.index ["order_id", "item_id"], name: "index_item_orders_on_order_id_and_item_id"
     t.index ["order_id"], name: "index_item_orders_on_order_id"
   end
 
@@ -37,6 +38,8 @@ ActiveRecord::Schema.define(version: 2026_02_24_115933) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_items_on_lower_name"
+    t.index ["user_id", "name"], name: "index_items_on_user_id_and_name"
     t.index ["user_id"], name: "index_items_on_user_id"
   end
 
@@ -78,6 +81,7 @@ ActiveRecord::Schema.define(version: 2026_02_24_115933) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "item_orders", "items"

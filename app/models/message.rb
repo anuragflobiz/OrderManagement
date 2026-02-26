@@ -1,10 +1,9 @@
 class Message < ApplicationRecord
 
-  include SoftDelete
   belongs_to :user
   belongs_to :message_template
   
-  enum status: {  sent: 0, failed: 1 }
+  enum status: { pending:0, sent: 1, failed: 2 }
   
   validates :message_template_id, presence: true
   
