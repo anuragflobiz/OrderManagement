@@ -1,0 +1,4 @@
+:schedule:
+  daily_stock_report:
+    cron: "0 0 * * *"
+    class: DailyStockReportWorker
