@@ -1,8 +1,7 @@
 class StockMailer < ApplicationMailer
-  def stock_report(retailer_id)
+  def stock_report(retailer_id, body)
     @retailer = User.find(retailer_id)
-    @low_stock = @retailer.items.low_stock
-    @out_of_stock = @retailer.items.out_of_stock
+    @body = body
 
     mail(
       to: @retailer.email,
