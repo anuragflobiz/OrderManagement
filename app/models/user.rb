@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include SoftDeletable
+  include SoftDelete
   has_secure_password
 
   has_many :orders, dependent: :destroy
@@ -8,7 +8,7 @@ class User < ApplicationRecord
 
   validates :email, presence: true, uniqueness: true
   validates :name, presence: true
-  validates :password, presence: true
+  validates :password, presence: true, on: :create
 
   enum role: { retailer: 0, customer: 1 }
 

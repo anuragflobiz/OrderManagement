@@ -148,6 +148,8 @@ GEM
       ffi (~> 1.0)
     redis (4.5.1)
     ruby_dep (1.5.0)
+    rufus-scheduler (3.9.2)
+      fugit (~> 1.1, >= 1.11.1)
     sidekiq (5.2.10)
       connection_pool (~> 2.2, >= 2.2.2)
       rack (~> 2.0)
@@ -156,6 +158,11 @@ GEM
     sidekiq-cron (1.4.0)
       fugit (~> 1)
       sidekiq (>= 4.2.1)
+    sidekiq-scheduler (4.0.3)
+      redis (>= 4.2.0)
+      rufus-scheduler (~> 3.2)
+      sidekiq (>= 4, < 7)
+      tilt (>= 1.4.0)
     spring (2.1.1)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -171,6 +178,7 @@ GEM
     strscan (3.1.7)
     thor (1.2.2)
     thread_safe (0.3.6)
+    tilt (2.7.0)
     timeout (0.4.0)
     tzinfo (1.2.11)
       thread_safe (~> 0.1)
@@ -196,6 +204,7 @@ DEPENDENCIES
   redis (~> 4.5)
   sidekiq (~> 5.2)
   sidekiq-cron (~> 1.2)
+  sidekiq-scheduler
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data

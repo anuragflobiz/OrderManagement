@@ -1,12 +1,12 @@
 class Message < ApplicationRecord
 
-  include SoftDeletable
+  include SoftDelete
   belongs_to :user
   belongs_to :message_template
   
-  enum status: { pending: 0, sent: 1, failed: 2 }
+  enum status: {  sent: 0, failed: 1 }
   
-  validates :notification_template_id, presence: true
+  validates :message_template_id, presence: true
   
   scope :active, -> { where(deleted_at: nil) }
 end
