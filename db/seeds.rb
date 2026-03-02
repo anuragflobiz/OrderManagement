@@ -5,3 +5,20 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+MessageTemplate.find_or_create_by!(name: 'order_confirmation') do |template|
+  template.body = 'Hello {{name}}, your order #{{order_id}} of ₹{{amount}} is confirmed.'
+end
+
+MessageTemplate.find_or_create_by!(name: 'stock_report') do |template|
+  template.body = <<~BODY
+    Hello {{name}},
+
+    ⚠️ Low Stock Items:
+    {{low_stock}}
+
+    ❌ Out of Stock Items:
+    {{out_of_stock}}
+
+    Please restock your items soon.
+  BODY
+end
