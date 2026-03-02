@@ -2,52 +2,53 @@ class AuthController < ApplicationController
   skip_before_action :authenticate_request!, only: [:login,:signup,:request_otp,:forgot_password,:reset_password]
 
   def request_otp
-    result = AuthService.request_otp(params[:email])
-    render_response(result)
+    AuthService.new(email: params[:email]).request_otp
+    render_success(nil, "OTP sent")
   end
 
   def signup
-    result = AuthService.signup(user_params.merge(otp: params[:otp]))
-    render_response(result, :created)
+    service = AuthService.new(user_params.merge(otp: params[:otp]))
+    data = service.signup
+
+    render_success(data, "Signup successful", :created)
   end
 
   def login
-    result = AuthService.login(params[:email], params[:password])
-    render_response(result)
+    service = AuthService.new(
+      email: params[:email],
+      password: params[:password]
+    )
+
+    data = service.login
+
+    render_success(data, "Login successful")
   end
 
   def logout
     token = request.headers['Authorization']&.split(' ')&.last
-    result = AuthService.logout(token)
-    render_response(result)
+    AuthService.new.logout(token)
+
+    render_success(nil, "Logged out")
   end
 
   def forgot_password
-    result = AuthService.forgot_password(params[:email])
-    render_response(result)
+    AuthService.new(email: params[:email]).forgot_password
+    render_success(nil, "Reset OTP sent")
   end
 
   def reset_password
-    result = AuthService.reset_password(params[:email],params[:otp],params[:new_password])
-    render_response(result)
+    service = AuthService.new(
+      email: params[:email],
+      otp: params[:otp],
+      new_password: params[:new_password]
+    )
+
+    service.reset_password
+
+    render_success(nil, "Password reset successful")
   end
 
   private
-
-  def render_response(result, success_status = :ok)
-    if result[:success]
-      render json: {
-        success: true,
-        message: result[:message],
-        data: result[:data]
-      }, status: success_status
-    else
-      render json: {
-        success: false,
-        message: result[:message]
-      }, status: :unprocessable_entity
-    end
-  end
 
   def user_params
     params.permit(:name, :email, :phone_number, :password, :role)

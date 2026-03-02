@@ -1,6 +1,6 @@
 class ItemOrder < ApplicationRecord
 
-  include SoftDelete
+  acts_as_paranoid
   belongs_to :item
   belongs_to :order
 end
