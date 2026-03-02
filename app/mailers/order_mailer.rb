@@ -1,6 +1,10 @@
 class OrderMailer < ApplicationMailer
-  def order_confirmation(order_id)
-    @order = Order.find(order_id)
-    mail(to: @order.user.email, subject: "Order Confirmation")
+  def send_email(user, subject, body)
+    mail(
+      to: user.email,
+      subject: subject,
+      body: body,
+      content_type: "text/plain"
+    )
   end
 end

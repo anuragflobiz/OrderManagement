@@ -1,31 +1,39 @@
 class ItemService
-  class UnauthorizedError < StandardError; end
+  include Pagination
 
-
-  def self.create(user, params)
-    raise UnauthorizedError, "Retailers only" unless user.retailer?
-
-    item = user.items.new(params)
-    item.save!
-    item
+  def initialize(user)
+    @user = user
   end
 
+  def create(params)
+    @user.items.create!(params)
+  end
 
-  def self.update(user, item, params)
-    authorize_owner!(user, item)
+  def update(item, params)
     item.update!(params)
     item
   end
 
-
-  def self.destroy(user, item)
-    authorize_owner!(user, item)
+  def destroy(item)
     item.destroy!
+  end
+
+  def list(params)
+    base_scope = @user.retailer? ? @user.items : Item.all
+    filtered = apply_search(base_scope, params[:search])
+
+    result = self.class.paginate(filtered, params)
+
+    {
+      items: result[:records].as_json(only: [:id, :name, :price, :quantity]),
+      pagination: result[:pagination]
+    }
   end
 
   private
 
-  def self.authorize_owner!(user, item)
-    raise UnauthorizedError, "Access denied" unless item.user_id == user.id
+  def apply_search(scope, search)
+    return scope unless search.present?
+    scope.where("LOWER(name) LIKE ?", "#{search.downcase}%")
   end
 end
