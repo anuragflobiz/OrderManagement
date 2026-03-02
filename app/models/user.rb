@@ -1,22 +1,24 @@
 class User < ApplicationRecord
-  include SoftDelete
+  acts_as_paranoid
   has_secure_password
 
-  has_many :orders, dependent: :destroy
-  has_many :items, dependent: :destroy
-  has_many :messages, dependent: :destroy
+  has_many :orders
+  has_many :items
+  has_many :messages
 
   validates :email, presence: true, uniqueness: true
   validates :name, presence: true
-  validates :password, presence: true, on: :create
+  validates :password, length: { minimum: 9 }, allow_nil: true
 
   enum role: { retailer: 0, customer: 1 }
 
-  def retailer?
-    role == 'retailer'
-  end
-  
-  def customer?
-    role == 'customer'
+  before_destroy :handle_role_based_cleanup
+
+  before_save { self.email = email.downcase }
+
+  private
+
+  def handle_role_based_cleanup
+    items.destroy_all if retailer?
   end
 end

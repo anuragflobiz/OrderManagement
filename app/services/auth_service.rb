@@ -1,101 +1,67 @@
 class AuthService
-
-  def self.request_otp(email)
-    return error("Email required") if email.blank?
-
-    otp = OtpService.generate(email, 'signup')
-    OtpMailer.send_otp(email, otp, 'signup').deliver_later
-
-    success(nil, "OTP sent to #{email}")
+  def initialize(params = {})
+    @params = params
+    @email  = params[:email]&.downcase
+    @otp    = params[:otp]
+    @password = params[:password]
   end
 
+  def request_otp
+    raise CustomErrors::BadRequest, "Email required" if email.blank?
 
-  def self.signup(params)
-    email = params[:email]
-    otp   = params[:otp]
-
-    return error("OTP required") if otp.blank?
-    return error("Invalid OTP") unless OtpService.verify(email, 'signup', otp)
-
-    user = User.new(params.except(:otp))
-
-    if user.save
-      token = JwtService.encode(user_id: user.id)
-
-      success(
-        {
-          token: token,
-          user: user.as_json(only: [:id, :name, :email, :role])
-        },
-        "Signup successful"
-      )
-    else
-      error(user.errors.full_messages.join(', '))
-    end
+    otp = OtpService.generate(email, "signup")
+    OtpMailer.send_otp(email, otp, "signup").deliver_later
   end
 
+  def signup
+    raise CustomErrors::BadRequest, "OTP required" if otp.blank?
+    raise CustomErrors::BadRequest, "Invalid OTP" unless OtpService.verify(email, "signup", otp)
 
-  def self.login(email, password)
-    user = User.find_by(email: email.to_s.downcase)
-
-    return error("Invalid credentials") unless user&.authenticate(password)
-
-    token = JwtService.encode(user_id: user.id)
-
-    success(
-      {
-        token: token,
-        user: user.as_json(only: [:id, :name, :email, :role])
-      },
-      "Login successful"
-    )
+    user = User.create!(@params.except(:otp))
+    generate_auth_response(user)
   end
 
-
-  def self.logout(token)
-    JwtService.blacklist_token(token) if token
-    success(nil, "Logged out")
-  end
-
-
-  def self.forgot_password(email)
-    email = email.to_s.downcase
-    return error("Email required") if email.blank?
-
+  def login
     user = User.find_by(email: email)
-    return error("Email not found") unless user
+    raise CustomErrors::Unauthorized, "Invalid credentials" unless user&.authenticate(password)
 
-    otp = OtpService.generate(email, 'reset')
-    OtpMailer.send_otp(email, otp, 'reset password').deliver_later
-
-    success(nil, "Reset OTP sent")
+    generate_auth_response(user)
   end
 
+  def logout(token)
+    raise CustomErrors::Unauthorized, "Missing token" if token.blank?
 
-  def self.reset_password(email, otp, new_password)
-    email = email.to_s.downcase
-
-    return error("All fields required") if [email, otp, new_password].any?(&:blank?)
-    return error("Invalid OTP") unless OtpService.verify(email, 'reset', otp)
-
-    user = User.find_by(email: email)
-    return error("User not found") unless user
-
-    if user.update(password: new_password)
-      success(nil, "Password reset successful")
-    else
-      error(user.errors.full_messages.join(', '))
-    end
+    payload = JwtService.decode(token)
+    ::REDIS.del("token:#{payload[:jti]}")
   end
 
+  def forgot_password
+    raise CustomErrors::BadRequest, "Email required" if email.blank?
+
+    User.find_by!(email: email)
+
+    otp = OtpService.generate(email, "reset")
+    OtpMailer.send_otp(email, otp, "reset").deliver_later
+  end
+
+  def reset_password
+    raise CustomErrors::BadRequest, "All fields required" if [email, otp, @params[:new_password]].any?(&:blank?)
+    raise CustomErrors::BadRequest, "Invalid OTP" unless OtpService.verify(email, "reset", otp)
+
+    user = User.find_by!(email: email)
+    user.update!(password: @params[:new_password])
+  end
 
   private
 
-  def self.success(data, message)
-    { success: true, data: data, message: message }
-  end
+  attr_reader :params, :email, :otp, :password
 
-  def self.error(message)
-    { success: false, message: message }
+  def generate_auth_response(user)
+    token = JwtService.encode(user_id: user.id)
+
+    {
+      token: token,
+      user: user.slice(:id, :name, :email, :role)
+    }
   end
 end
