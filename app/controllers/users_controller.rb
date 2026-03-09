@@ -11,6 +11,7 @@ class UsersController < ApplicationController
   def update
     user = UserService.update(@user, user_params)
 
+    
     render_success(
       user.slice(:id, :name, :email, :phone_number),
       "Profile updated successfully"
