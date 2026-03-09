@@ -12,13 +12,5 @@ class User < ApplicationRecord
 
   enum role: { retailer: 0, customer: 1 }
 
-  before_destroy :handle_role_based_cleanup
-
   before_save { self.email = email.downcase }
-
-  private
-
-  def handle_role_based_cleanup
-    items.destroy_all if retailer?
-  end
 end
