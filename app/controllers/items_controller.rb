@@ -3,6 +3,12 @@ class ItemsController < ApplicationController
 
   rescue_from ItemService::UnauthorizedError, with: :forbidden
 
+  def index
+    result = ItemService.list(current_user, params)
+    render_success(result)
+  end
+
+
   def create
     item = ItemService.create(current_user, item_params)
     render_success(item.slice(:id, :name, :price, :quantity), "Item created", :created)
